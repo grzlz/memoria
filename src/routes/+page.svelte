@@ -50,18 +50,20 @@
           Gracias. Te notificaremos cuando estemos en línea.
         </div>
       {:else}
-        <form on:submit|preventDefault={handleSubmit} class="w-100">
-          <div class="input-group mb-3 shadow-sm">
-            <input
-              type="email"
-              bind:value={email}
-              class="form-control email-input"
-              placeholder="tu@email.com"
-              required
-            />
-            <button class="btn btn-outline-light" type="submit">Notificarme cuando esté listo</button>
-          </div>
-        </form>
+      <form on:submit|preventDefault={handleSubmit} class="w-100">
+        <div class="d-flex flex-column flex-sm-row gap-2 mb-3 shadow-sm">
+          <input
+            type="email"
+            bind:value={email}
+            class="form-control email-input"
+            placeholder="tu@email.com"
+            required
+          />
+          <button class="btn btn-outline-light" type="submit">
+            Notificarme cuando esté listo
+          </button>
+        </div>
+      </form>
       {/if}
   
       <p class="small text-muted mt-4">
