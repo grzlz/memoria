@@ -1,112 +1,113 @@
 <script>
-    let email = '';
-    let submitted = false;
-  
-    async function handleSubmit(e) {
-    if (email) {
-        try {
-        const response = await fetch('/api/correo', {
-            method: 'POST',
-            headers: {
-            'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ correo: email })
-        });
+  import { onMount } from 'svelte';
 
-        if (response.ok) {
-            submitted = true;
-            email = '';
-        } else {
-            console.error('Error al enviar el correo:', await response.text());
-        }
-        } catch (error) {
-        console.error('Error de red:', error);
-        }
-    }
-    }
+  let mouseX = 0;
+  let mouseY = 0;
 
-  </script>
-  
-  <svelte:head>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Source+Sans+3&display=swap"
-      rel="stylesheet"
-    />
-  </svelte:head>
-  
-  <div class="bg-dark text-light min-vh-100 d-flex flex-column justify-content-center align-items-center p-4">
-    <div class="text-center" style="max-width: 600px;">
-      <h1 class="display-4 mb-3 title">Archivo de memoria en construcción</h1>
-      <p class="lead mb-4 fw-light">
-        No podemos olvidar lo que no se debe olvidar.
-      </p>
-  
-      {#if submitted}
-        <div class="alert alert-success" role="alert">
-          Gracias. Te notificaremos cuando estemos en línea.
-        </div>
-      {:else}
-      <form on:submit|preventDefault={handleSubmit} class="w-100">
-        <div class="d-flex flex-column flex-sm-row gap-2 mb-3 shadow-sm">
-          <input
-            type="email"
-            bind:value={email}
-            class="form-control email-input"
-            placeholder="tu@email.com"
-            required
-          />
-          <button class="btn btn-outline-light" type="submit">
-            Notificarme cuando esté listo
-          </button>
-        </div>
-      </form>
-      {/if}
-  
-      <p class="small text-muted mt-4">
-        Sin spam. Solo memoria.
-      </p>
+  const palabra1 = "Teuchitlán".split("");
+  const palabra2 = "Ceremonia".split("");
+
+  function handleMouseMove(event) {
+    mouseX = event.clientX;
+    mouseY = event.clientY;
+    updateLetters();
+  }
+
+  function updateLetters() {
+    const letters = document.querySelectorAll('.letter');
+    letters.forEach((letter) => {
+      const rect = letter.getBoundingClientRect();
+      const dx = rect.left + rect.width / 2 - mouseX;
+      const dy = rect.top + rect.height / 2 - mouseY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const maxDist = 150;
+      const force = dist < maxDist ? (1 - dist / maxDist) * 20 : 0;
+
+      const offsetX = (dx / dist) * force;
+      const offsetY = (dy / dist) * force;
+
+      letter.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+    });
+  }
+
+  onMount(() => {
+    window.addEventListener('mousemove', handleMouseMove);
+  });
+</script>
+
+<svelte:head>
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&display=swap"
+    rel="stylesheet"
+  />
+</svelte:head>
+
+<div class="main-wrapper">
+  <div class="container text-light py-5">
+    <div class="row justify-content-center mb-5">
+      <div class="col-md-8">
+        <input
+          type="text"
+          class="form-control form-control-lg search-bar"
+          placeholder="Buscar en la memoria..."
+        />
+      </div>
+    </div>
+
+    <div class="row justify-content-center align-items-center">
+      <div class="col-5 text-end word-container">
+        {#each palabra1 as char, i}
+          <span class="letter" style="display: inline-block;">{char}</span>
+        {/each}
+      </div>
+      <div class="col-1 text-center">
+        <div class="separator"></div>
+      </div>
+      <div class="col-5 text-start word-container">
+        {#each palabra2 as char, i}
+          <span class="letter" style="display: inline-block;">{char}</span>
+        {/each}
+      </div>
     </div>
   </div>
-  
-  <style>
-    .title {
-      font-family: 'Playfair Display', serif;
-      letter-spacing: 1px;
-    }
-  
-    .lead {
-      font-family: 'Source Sans 3', sans-serif;
-      font-size: 1.1rem;
-      color: #ccc;
-    }
-  
-    .email-input {
-      background-color: #2c2c2c;
-      border: 1px solid #555;
-      color: white;
-    }
-  
-    .email-input::placeholder {
-      color: #aaa;
-    }
-  
-    button.btn {
-      border-color: #888;
-      color: #eee;
-    }
-  
-    button.btn:hover {
-      background-color: #444;
-    }
-  
-    .alert-success {
-      background-color: #234c2c;
-      border-color: #1e3f26;
-      color: #cdeac0;
-    }
-  </style>
-  
+</div>
+
+<style>
+  .main-wrapper {
+    background-color: #000;
+    min-height: 100vh;
+    color: white;
+    font-family: 'Playfair Display', serif;
+    overflow: hidden;
+  }
+
+  .search-bar {
+    background-color: #111;
+    color: white;
+    border: 1px solid #555;
+    border-radius: 0;
+  }
+
+  .search-bar::placeholder {
+    color: #888;
+  }
+
+  .letter {
+    font-size: 2.5rem;
+    transition: transform 0.15s ease-out;
+    will-change: transform;
+    pointer-events: none;
+  }
+
+  .separator {
+    width: 10px;
+    height: 10px;
+    background-color: #fff;
+    border-radius: 50%;
+    margin: 1rem auto;
+  }
+</style>
